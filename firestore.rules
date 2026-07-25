@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Reglas sugeridas para Firestore. Cópialas en Firebase Console > Firestore Database > Reglas.
+// Modelo: no hay autenticación de usuarios (login), así que el "código de pareja" actúa
+// como la clave de acceso al documento. Cualquiera con el código puede leer/escribir esa
+// pareja concreta, pero no puede listar ni acceder a otras parejas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /couples/{coupleCode} {
+      allow get: if true;
+      allow list: if false; // nunca se debe poder listar todos los códigos
+      allow create: if request.resource.data.keys().hasOnly(['createdAt', 'partner1', 'partner2']);
+      allow update: if resource.data.keys().hasAll(['partner1', 'partner2']);
+      allow delete: if false;
+    }
+  }
+}
